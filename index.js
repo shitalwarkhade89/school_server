@@ -1,11 +1,31 @@
 import express from "express";
+import mongoose, {model,Schema} from 'mongoose';
 
 const app = express();
 app.use(express.json());
 
 const PORT = 5000;
 
-const students = [];
+// MongoDB Connection
+const MONGODB_URI ='mongodb+srv://shitalwarkhade89:eYoJqYA6NrIJOet5@igcp.agawvrs.mongodb.net/school';
+const connectMongoDb =async() => {
+ const conn = await mongoose.connect( MONGODB_URI)
+ if (conn){
+    console.log('Mongodb connected succesfully.');
+ }
+};
+connectMongoDb();
+
+// schema
+const studentSchema = new Schema({
+   name:String ,
+   age:Number,
+   mobile: String,
+   email: String,
+});
+
+// model
+const student = model('student',studentSchema);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'All good, All set' });
@@ -19,7 +39,7 @@ app.get('/students', (req, res) => {
     })
 });
 // post student
-app.post('/student', (req, res) => {
+app.post('/student', async (req, res) => {
     const { name, age, mobile, email } = req.body;
     if (!name) {
         return res.json({
@@ -48,21 +68,17 @@ app.post('/student', (req, res) => {
             message: 'email is required',
         })
     }
-
-    const id = Math.floor(Math.random() * 100000) + 1;
-
-    const newStudent = {
-        id: id,
-        name: name,
-        age: age,
-        mobile: mobile,
-        email: email,
-    }
-    students.push(newStudent);
-
+        // instance of module
+    const newStudent =  new student({
+        name:name,
+        age:age,
+        mobile:mobile,
+        email:email,
+    })
+    const savedStudent = await newStudent.save();
     res.json({
         success: true,
-        data: newStudent,
+        data: savedStudent,
         message: 'successfully added students',
     })
 });
