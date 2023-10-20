@@ -25,13 +25,15 @@ const studentSchema = new Schema({
 });
 
 // model
-const student = model('student',studentSchema);
+const Student = model('Student',studentSchema);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'All good, All set' });
 });
 // get students
-app.get('/students', (req, res) => {
+app.get('/students', async(req, res) => {
+    const students =  await student.find()
+
     res.json({
         success: true,
         data: students,
@@ -69,39 +71,28 @@ app.post('/student', async (req, res) => {
         })
     }
         // instance of module
-    const newStudent =  new student({
+    const stud =  new Student({
         name:name,
         age:age,
         mobile:mobile,
         email:email,
     })
-    const savedStudent = await newStudent.save();
+    const savedStudent = await stud.save();
     res.json({
         success: true,
         data: savedStudent,
-        message: 'successfully added students',
+        message: 'successfully added  new students',
     })
 });
 // get student
-app.get('/student', (req, res) => {
-    const { id } = req.query;
-    let student = null;
+app.get('/student', async (req, res) => {
+    const { email } = req.query;
 
-    students.forEach((stud) => {
-        if (stud.id == id) {
-            student = stud;
-        }
-
-    })
-    if(student == null){
-       return res.json({
-        success: false,
-        message:'student not found',
-       })
-    }
+    const savedStudent = await Student.findOne({email:email})
+  
     res.json({
         success: true,
-        data: student,
+        data: savedStudent,
         message: 'successfully fetched student',
     })
 });
