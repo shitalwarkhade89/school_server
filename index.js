@@ -1,5 +1,10 @@
 import express from "express";
-import mongoose, {model,Schema} from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import Student from "./models/student.js";
+
 
 const app = express();
 app.use(express.json());
@@ -7,32 +12,23 @@ app.use(express.json());
 const PORT = 5000;
 
 // MongoDB Connection
-const MONGODB_URI ='mongodb+srv://shitalwarkhade89:eYoJqYA6NrIJOet5@igcp.agawvrs.mongodb.net/school';
-const connectMongoDb =async() => {
- const conn = await mongoose.connect( MONGODB_URI)
- if (conn){
-    console.log('Mongodb connected succesfully.');
- }
+
+const connectMongoDb = async () => {
+    const conn = await mongoose.connect(process.env.MONGODB_URI)
+    if (conn) {
+        console.log('Mongodb connected succesfully.');
+    }
 };
 connectMongoDb();
 
-// schema
-const studentSchema = new Schema({
-   name:String ,
-   age:Number,
-   mobile: String,
-   email: String,
-});
 
-// model
-const Student = model('Student',studentSchema);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'All good, All set' });
 });
 // get students
-app.get('/students', async(req, res) => {
-    const students =  await student.find()
+app.get('/students', async (req, res) => {
+    const students = await Student.find()
 
     res.json({
         success: true,
@@ -40,6 +36,8 @@ app.get('/students', async(req, res) => {
         message: 'Successfully fetched all students',
     })
 });
+
+
 // post student
 app.post('/student', async (req, res) => {
     const { name, age, mobile, email } = req.body;
@@ -70,12 +68,12 @@ app.post('/student', async (req, res) => {
             message: 'email is required',
         })
     }
-        // instance of module
-    const stud =  new Student({
-        name:name,
-        age:age,
-        mobile:mobile,
-        email:email,
+    // instance of module
+    const stud = new Student({
+        name: name,
+        age: age,
+        mobile: mobile,
+        email: email,
     })
     const savedStudent = await stud.save();
     res.json({
@@ -88,8 +86,8 @@ app.post('/student', async (req, res) => {
 app.get('/student', async (req, res) => {
     const { email } = req.query;
 
-    const savedStudent = await Student.findOne({email:email})
-  
+    const savedStudent = await Student.findOne({ email: email })
+
     res.json({
         success: true,
         data: savedStudent,
